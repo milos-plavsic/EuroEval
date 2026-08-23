@@ -316,7 +316,7 @@ euroeval --model <model-id> --dataset belacola
 
 ## Natural Language Inference
 
-### Unofficial: BeRTE-WD
+### BeRTE-WD
 
 [BeRTE-WD](https://huggingface.co/datasets/maaxap/BelarusianGLUE) is the
 Belarusian textual entailment dataset from the BelarusianGLUE collection. Each sample
@@ -691,7 +691,7 @@ euroeval --model <model-id> --dataset multi-ifeval-be
 
 ## Hallucination Detection
 
-### Unofficial: RAGTruth-be
+### RAGTruth-be
 
 This dataset is a Belarusian translation of the
 [RAGTruth](https://aclanthology.org/2024.acl-long.585/) hallucination benchmark, which

@@ -14,8 +14,11 @@ project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 - Added the unofficial Belarusian linguistic acceptability dataset `belacola`, based on
   the BelaCoLA dataset from BelarusianGLUE.
 - Added the unofficial Belarusian BeRTE-WD binary natural language inference dataset.
-- Added the sample hallucination rate metric as the primary hallucination score, while
-  retaining the token hallucination rate as a secondary score.
+
+### Changed
+
+- Upgraded the vLLM dependency to version 0.27.1 or newer.
+- Promoted the unofficial dataset `berte-wd` to official.
 
 ### Fixed
 

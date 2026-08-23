@@ -77,6 +77,20 @@ MULTI_IFEVAL_BE_CONFIG = DatasetConfig(
     val_split=None,
 )
 
+BERTE_WD_CONFIG = DatasetConfig(
+    name="berte-wd",
+    pretty_name="BeRTE-WD",
+    source="EuroEval/berte-wd-mini",
+    task=NLI,
+    languages=[BELARUSIAN],
+    labels=["entailment", "non_entailment"],
+    prompt_label_mapping=dict(entailment="праўда", non_entailment="не вынікае"),
+    prompt_prefix="Ніжэй прыведзены пары сцвярджэнняў. Вызначце, ці вынікае "
+    "другое сцвярджэнне з першага. Адказ можа быць {labels_str}.",
+    prompt_template="{text}\nІмплікацыя: {label}",
+    instruction_prompt="{text}\n\nВызначце, ці вынікае другое сцвярджэнне з "
+    "першага. Адкажыце толькі {labels_str}, і нічога іншага.",
+)
 
 # Unofficial datasets ###
 
@@ -91,22 +105,6 @@ FLORES_BE_EN_CONFIG = TranslationDatasetConfig(
     unofficial=True,
 )
 
-BERTE_WD_CONFIG = DatasetConfig(
-    name="berte-wd",
-    pretty_name="BeRTE-WD",
-    source="EuroEval/berte-wd-mini",
-    task=NLI,
-    languages=[BELARUSIAN],
-    labels=["entailment", "non_entailment"],
-    prompt_label_mapping=dict(entailment="праўда", non_entailment="не вынікае"),
-    prompt_prefix="Ніжэй прыведзены пары сцвярджэнняў. Вызначце, ці вынікае "
-    "другое сцвярджэнне з першага. Адказ можа быць {labels_str}.",
-    prompt_template="{text}\nІмплікацыя: {label}",
-    instruction_prompt="{text}\n\nВызначце, ці вынікае другое сцвярджэнне з "
-    "першага. Адкажыце толькі {labels_str}, і нічога іншага.",
-    unofficial=True,
-)
-
 RAGTRUTH_BE_CONFIG = DatasetConfig(
     name="ragtruth-be",
     pretty_name="RAGTruth-be",
@@ -114,7 +112,6 @@ RAGTRUTH_BE_CONFIG = DatasetConfig(
     task=HALLU,
     languages=[BELARUSIAN],
     train_split=None,
-    unofficial=True,
 )
 
 BELACOLA_CONFIG = DatasetConfig(

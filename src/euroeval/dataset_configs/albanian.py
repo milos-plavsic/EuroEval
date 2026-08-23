@@ -94,6 +94,15 @@ INCLUDE_SQ_CONFIG = DatasetConfig(
     languages=[ALBANIAN],
 )
 
+RAGTRUTH_SQ_CONFIG = DatasetConfig(
+    name="ragtruth-sq",
+    pretty_name="RAGTruth-sq",
+    source="EuroEval/ragtruth-translated-hallucinations-sq-mini",
+    task=HALLU,
+    languages=[ALBANIAN],
+    train_split=None,
+)
+
 
 # Unofficial datasets ###
 
@@ -114,15 +123,5 @@ GLOBAL_MMLU_LITE_SQ_CONFIG = DatasetConfig(
     source="EuroEval/global-mmlu-lite-sq",
     task=KNOW,
     languages=[ALBANIAN],
-    unofficial=True,
-)
-
-RAGTRUTH_SQ_CONFIG = DatasetConfig(
-    name="ragtruth-sq",
-    pretty_name="RAGTruth-sq",
-    source="EuroEval/ragtruth-translated-hallucinations-sq-mini",
-    task=HALLU,
-    languages=[ALBANIAN],
-    train_split=None,
     unofficial=True,
 )
