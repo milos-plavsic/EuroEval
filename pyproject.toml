@@ -111,7 +111,7 @@ dev = [
     "tqdm-stubs>=0.2.1",
     "pre-commit>=4.5.1",
     "plotly>=6.9.0",
-    "slopo>=0.4.0",
+    "slopo>=0.5.0",
     "vulture>=2.16",
 ]
 
@@ -233,6 +233,10 @@ convention = "google"
 [tool.ty.src]
 # Vulture whitelist: bare names are intentionally "undefined" here.
 exclude = ["vulture_whitelist.py"]
+# The dataset creation scripts carry PEP 723 inline metadata, which makes ty check them
+# in an isolated environment that ignores all project configuration (including the rule
+# settings below), so they have to be skipped entirely instead.
+exclude-scripts = true
 
 [tool.ty.rules]
 unresolved-import = "ignore"
