@@ -15,6 +15,11 @@ project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
   the BelaCoLA dataset from BelarusianGLUE.
 - Added the unofficial Belarusian BeRTE-WD binary natural language inference dataset.
 
+### Changed
+
+- Upgraded the vLLM dependency to version 0.27.1 or newer.
+- Promoted the unofficial dataset `berte-wd` to official.
+
 ### Fixed
 
 - Fixed `#no-thinking` LiteLLM evaluations when providers reject a zero thinking budget
