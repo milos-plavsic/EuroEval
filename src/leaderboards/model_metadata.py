@@ -13,6 +13,7 @@ import shutil
 import typing as t
 import warnings
 from copy import deepcopy
+from datetime import date
 
 import httpx
 from huggingface_hub import HfApi
@@ -24,6 +25,8 @@ from huggingface_hub.errors import (
 from huggingface_hub.hf_api import RepositoryNotFoundError
 from requests.exceptions import RequestException
 
+from euroeval.benchmark_modules.hf import _get_model_release_date
+from euroeval.benchmark_modules.litellm import _get_api_model_release_date
 from euroeval.string_utils import split_model_id
 
 from .cache import Cache
@@ -491,6 +494,50 @@ def is_trained_from_scratch(
             cache.trained_from_scratch[model_id] = False
             return False
         logger.error("Invalid input. Please try again.")
+
+
+def backfill_release_dates(records: list[dict], cache: Cache) -> list[dict]:
+    """Add release dates to historical records, looking up each model once.
+
+    Existing valid dates are authoritative. API dates use the curated provider
+    metadata, while Hugging Face dates are the first commit containing model
+    weights. Lookup failures remain ``None`` and are cached for the whole run.
+
+    Returns:
+        The records with normalised or inferred release dates.
+    """
+    hf_api: HfApi | None = None
+    for record in records:
+        additional = record.setdefault("model_info", {}).setdefault(
+            "additional_details", {}
+        )
+        existing = additional.get("release_date")
+        if isinstance(existing, str):
+            try:
+                normalised = date.fromisoformat(existing).isoformat()
+            except ValueError:
+                pass
+            else:
+                additional["release_date"] = normalised
+                continue
+
+        model_id = split_model_id(
+            model_id=plain_model_id(get_model_name(record=record))
+        ).model_id
+        if model_id not in cache.release_date:
+            model_url = additional.get("model_url") or cache.model_url.get(model_id)
+            if isinstance(model_url, str) and (
+                "huggingface.co/" in model_url or "hf.co/" in model_url
+            ):
+                if hf_api is None:
+                    hf_api = HfApi()
+                cache.release_date[model_id] = _get_model_release_date(
+                    hf_api=hf_api, model_id=model_id, revision="main", token=None
+                )
+            else:
+                cache.release_date[model_id] = _get_api_model_release_date(model_id)
+        additional["release_date"] = cache.release_date[model_id]
+    return records
 
 
 def fix_metadata(record: dict[str, t.Any]) -> dict[str, t.Any]:

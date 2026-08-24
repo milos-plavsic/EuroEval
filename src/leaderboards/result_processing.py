@@ -21,7 +21,12 @@ from tqdm.auto import tqdm
 from .cache import Cache
 from .constants import HF_RESULTS_BUCKET, RESULTS_DIR
 from .evaluation_common import resolve_hf_token
-from .model_metadata import add_missing_entries, fix_metadata, record_is_valid
+from .model_metadata import (
+    add_missing_entries,
+    backfill_release_dates,
+    fix_metadata,
+    record_is_valid,
+)
 from .record_fields import deduplicate_records
 from .records import get_model_name
 from .result_identity import (
@@ -114,6 +119,7 @@ def process_results(
         )
         for record in tqdm(processed_records, desc="Adding missing entries")
     ]
+    processed_records = backfill_release_dates(records=processed_records, cache=cache)
 
     _upload_per_model_files(
         processed_records=processed_records, upload_to_bucket=upload_to_bucket

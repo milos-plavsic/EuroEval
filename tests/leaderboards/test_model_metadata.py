@@ -23,6 +23,7 @@ from leaderboards.cache import Cache, _is_hf_url_for_model
 from leaderboards.constants import TRAINED_FROM_SCRATCH_PATTERNS
 from leaderboards.model_metadata import (
     add_missing_entries,
+    backfill_release_dates,
     is_commercially_licensed,
     is_merge,
     is_open,
@@ -916,3 +917,62 @@ class TestValSuffixMetadataLookup:
         mock_api.model_info.assert_called_once_with(
             repo_id="microsoft/Phi-3-mini-4k-instruct"
         )
+
+
+@patch("leaderboards.model_metadata._get_model_release_date")
+def test_backfill_release_dates_preserves_existing_date(
+    mock_release_date: MagicMock,
+) -> None:
+    """A valid historical release date is never replaced by a lookup."""
+    record = {
+        "model_info": {
+            "name": "org/model",
+            "additional_details": {
+                "model_url": "https://hf.co/org/model",
+                "release_date": "2024-02-03",
+            },
+        }
+    }
+
+    backfill_release_dates(records=[record], cache=Cache())
+
+    mock_release_date.assert_not_called()
+
+
+def test_backfill_release_dates_reuses_api_date_for_all_records() -> None:
+    """Historical API records are enriched without duplicate lookups."""
+    records = [
+        {
+            "model_info": {
+                "name": "openai/gpt-4-0613",
+                "additional_details": {"model_url": "https://openai.com/gpt-4"},
+            }
+        }
+        for _ in range(2)
+    ]
+
+    enriched = backfill_release_dates(records=records, cache=Cache())
+
+    assert all(
+        record["model_info"]["additional_details"]["release_date"] == "2023-06-13"
+        for record in enriched
+    )
+
+
+@patch("leaderboards.model_metadata._get_model_release_date")
+def test_backfill_release_dates_uses_first_hf_weights_commit(
+    mock_release_date: MagicMock,
+) -> None:
+    """Historical Hugging Face records use the shared weights-history lookup."""
+    mock_release_date.return_value = "2024-02-03"
+    record = {
+        "model_info": {
+            "name": "org/model",
+            "additional_details": {"model_url": "https://hf.co/org/model"},
+        }
+    }
+
+    backfill_release_dates(records=[record], cache=Cache())
+
+    assert record["model_info"]["additional_details"]["release_date"] == "2024-02-03"
+    mock_release_date.assert_called_once()

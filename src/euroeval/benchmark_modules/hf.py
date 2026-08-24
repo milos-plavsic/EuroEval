@@ -1439,7 +1439,9 @@ def get_model_repo_info(
 
     # Try to get model info from local directory first
     model_info: HfApiModelInfo | None = None
-    if Path(model_id).is_dir():
+    release_date: str | None = None
+    is_local_model = Path(model_id).is_dir()
+    if is_local_model:
         model_info = _get_local_model_info(model_id=model_id)
         if model_info is None:
             return None
@@ -1453,6 +1455,9 @@ def get_model_repo_info(
         )
         if model_info is None:
             return None
+        release_date = _get_model_release_date(
+            hf_api=hf_api, model_id=model_id, revision=revision, token=token
+        )
 
     # Handle adapter models - get base model tags
     tags = model_info.tags or list()
@@ -1493,7 +1498,10 @@ def get_model_repo_info(
         return None
 
     return HFModelInfo(
-        pipeline_tag=pipeline_tag, tags=tags, adapter_base_model_id=base_model_id
+        pipeline_tag=pipeline_tag,
+        tags=tags,
+        adapter_base_model_id=base_model_id,
+        release_date=release_date,
     )
 
 
@@ -1657,6 +1665,36 @@ def _get_local_model_info(model_id: str) -> HfApiModelInfo | None:
             level=logging.WARNING,
         )
         return None
+
+
+def _get_model_release_date(
+    hf_api: HfApi, model_id: str, revision: str, token: str | None
+) -> str | None:
+    """Return the date when model weights first appeared in a Hub repository."""
+
+    def contains_weights(files: c.Iterable[str]) -> bool:
+        return any(
+            path.endswith(".safetensors")
+            or re.search(r"(?:^|/)(?:adapter|pytorch)_model.*\.bin$", path) is not None
+            for path in files
+        )
+
+    try:
+        commits = hf_api.list_repo_commits(
+            repo_id=model_id, revision=revision, token=token
+        )
+        for commit in reversed(commits):
+            files = hf_api.list_repo_files(
+                repo_id=model_id, revision=commit.commit_id, token=token
+            )
+            if contains_weights(files):
+                return commit.created_at.date().isoformat()
+    except (HfHubHTTPError, HFValidationError, OSError, RequestException) as e:
+        log(
+            f"Could not determine the release date for {model_id!r}: {e}",
+            level=logging.DEBUG,
+        )
+    return None
 
 
 def _get_tags_for_adapter_model(
