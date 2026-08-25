@@ -54,6 +54,11 @@
     "train": 128,
     "val": 64
   },
+  "EuroEval/belacola-mini": {
+    "test": 300,
+    "train": 1024,
+    "val": 256
+  },
   "EuroEval/belebele-da-mini": {
     "test": 580,
     "train": 256,
