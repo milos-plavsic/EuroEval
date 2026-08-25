@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from litellm.types.utils import Choices
 
-from euroeval.benchmark_modules.litellm import LiteLLMModel, _get_api_model_release_date
+from euroeval.benchmark_modules.litellm import LiteLLMModel, get_api_model_release_date
 from euroeval.data_models import BenchmarkConfig, DatasetConfig, ModelConfig
 from euroeval.exceptions import InvalidModel
 from euroeval.model_loading import load_model
@@ -120,18 +120,33 @@ class TestCreateModelOutput:
         ("openai/o1-pro", "2025-04-14"),
         ("openai/gpt-5-chat-latest", "2025-08-07"),
         ("openai/gpt-5.2-pro", "2025-12-11"),
+        ("openai/gpt-5.4-pro", "2026-03-05"),
+        ("openai/gpt-5.5-pro", "2026-04-23"),
         ("anthropic/claude-3-5-sonnet-20241022", "2024-10-22"),
         ("anthropic/claude-sonnet-4-6", "2026-02-17"),
+        ("anthropic/claude-opus-4-7", "2026-04-16"),
+        ("anthropic/claude-mythos-preview", "2026-04-07"),
+        ("anthropic/claude-fable-5", "2026-06-09"),
+        ("anthropic/claude-sonnet-5", "2026-06-30"),
+        ("anthropic/claude-opus-5", "2026-07-24"),
         ("gemini/gemini-3.1-pro-preview", "2026-02-19"),
+        ("gemini/gemini-3.1-flash-lite", "2026-03-03"),
+        ("gemini/gemini-3.5-flash", "2026-05-19"),
+        ("gemini/gemini-3.6-flash", "2026-07-21"),
+        ("gemini/gemini-3.7-flash", "2026-08-13"),
         ("xai/grok-4-fast-reasoning", "2025-09-19"),
+        ("xai/grok-4.20", "2026-03-10"),
+        ("xai/grok-4.5", "2026-07-08"),
+        ("xai/grok-4.6", "2026-08-12"),
         ("openai/gpt-5.6-luna", "2026-07-09"),
+        ("openai/gpt-5.6", "2026-07-09"),
         ("provider/undated-model", None),
         ("provider/model-2024-99-99", None),
     ],
 )
 def test_get_api_model_release_date(model_id: str, expected: str | None) -> None:
     """API aliases and dated model IDs resolve to their release dates."""
-    assert _get_api_model_release_date(model_id) == expected
+    assert get_api_model_release_date(model_id) == expected
 
 
 def test_litellm_model_config_includes_release_date(
@@ -151,4 +166,4 @@ def test_manual_api_release_date_overrides_embedded_date() -> None:
         {r"provider/model-2024-01-01": "2024-02-03"},
         clear=True,
     ):
-        assert _get_api_model_release_date("provider/model-2024-01-01") == "2024-02-03"
+        assert get_api_model_release_date("provider/model-2024-01-01") == "2024-02-03"

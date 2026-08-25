@@ -14,9 +14,9 @@ from transformers.models.xlm_roberta import (
 )
 
 from euroeval.benchmark_modules.hf import (
-    _get_model_release_date,
     _load_model_from_pretrained,
     get_dtype,
+    get_model_release_date,
     get_model_repo_info,
     setup_model_for_question_answering,
 )
@@ -84,7 +84,7 @@ def test_get_model_release_date_handles_hub_errors() -> None:
     api = MagicMock()
     api.list_repo_commits.side_effect = OSError("offline")
 
-    assert _get_model_release_date(api, "org/model", "main", None) is None
+    assert get_model_release_date(api, "org/model", "main", None) is None
 
 
 def test_get_model_release_date_returns_none_without_weights() -> None:
@@ -97,7 +97,7 @@ def test_get_model_release_date_returns_none_without_weights() -> None:
     api.list_repo_commits.return_value = [commit]
     api.list_repo_files.return_value = ["README.md", "optimizer.bin"]
 
-    assert _get_model_release_date(api, "org/model", "main", None) is None
+    assert get_model_release_date(api, "org/model", "main", None) is None
 
 
 @pytest.mark.parametrize(
@@ -118,7 +118,7 @@ def test_get_model_release_date_supports_pytorch_weights(weight_file: str) -> No
     api.list_repo_commits.return_value = [commit]
     api.list_repo_files.return_value = [weight_file]
 
-    assert _get_model_release_date(api, "org/model", "main", None) == "2024-02-03"
+    assert get_model_release_date(api, "org/model", "main", None) == "2024-02-03"
 
 
 def test_get_model_release_date_uses_first_weights_commit() -> None:
@@ -142,7 +142,7 @@ def test_get_model_release_date_uses_first_weights_commit() -> None:
         ["model-00001-of-00002.safetensors"],
     ]
 
-    assert _get_model_release_date(api, "org/model", "main", None) == "2024-02-03"
+    assert get_model_release_date(api, "org/model", "main", None) == "2024-02-03"
     assert api.list_repo_files.call_count == 2
 
 
