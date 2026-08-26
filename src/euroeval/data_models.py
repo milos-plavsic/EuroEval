@@ -1,7 +1,6 @@
 """Data models used in EuroEval."""
 
 import collections.abc as c
-import datetime
 import importlib.metadata
 import json
 import logging
@@ -21,6 +20,7 @@ from .constants import (
     CHOICES_MAPPING,
     MAX_NUMBER_OF_LOGGING_LANGUAGES,
 )
+from .date_utils import normalise_release_date
 from .eee_utils import benchmark_result_from_eee_dict, benchmark_result_to_eee_dict
 from .enums import Device, GenerativeType, ModelType, TaskGroup
 from .exceptions import InvalidBenchmark
@@ -287,16 +287,7 @@ class BenchmarkResult(pydantic.BaseModel):
         Returns:
             An ISO-formatted date, or None when the value is absent or malformed.
         """
-        if isinstance(value, datetime.datetime):
-            return value.date().isoformat()
-        if isinstance(value, datetime.date):
-            return value.isoformat()
-        if not isinstance(value, str):
-            return None
-        try:
-            return datetime.date.fromisoformat(value).isoformat()
-        except ValueError:
-            return None
+        return normalise_release_date(value)
 
 
 class HashableDict(dict[t.Any, t.Any]):
