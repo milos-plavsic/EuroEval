@@ -277,6 +277,13 @@ A huge thank you to all the contributors who have helped make this project a suc
         alt="Contributor avatar for rlrs"
     />
 </a>
+<a href="https://github.com/jaideeppyne">
+    <img
+        src="https://avatars.githubusercontent.com/u/25899506"
+        width=50
+        alt="Contributor avatar for jaideeppyne"
+    />
+</a>
 
 ### Contribute to EuroEval
 

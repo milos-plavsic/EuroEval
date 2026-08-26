@@ -19,11 +19,16 @@ project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- Swapped official dataset for Belarusian: `scala-be` → `belacola`.
 - Upgraded the vLLM dependency to version 0.27.1 or newer.
 - Promoted the unofficial dataset `berte-wd` to official.
 
 ### Fixed
 
+- Fixed an infinite loop in token-classification few-shot example selection when the
+  training split runs out of entity-bearing examples before `num_few_shots` is reached,
+  including when the labels contain case variants of the same entity (e.g. `b-per` and
+  `B-PER`).
 - Fixed `#no-thinking` LiteLLM evaluations when providers reject a zero thinking budget
   and require an explicit `thinking.type` of `disabled`.
 - The logical-reasoning task is now restricted to instruction-tuned and
