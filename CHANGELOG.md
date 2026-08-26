@@ -9,6 +9,8 @@ project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Added model release dates to benchmark result metadata for Hugging Face Hub and API
+  models.
 - Added the unofficial Belarusian Word-in-Context dataset `bewic`, based on the BeWiC
   dataset from BelarusianGLUE.
 - Added the unofficial Belarusian linguistic acceptability dataset `belacola`, based on

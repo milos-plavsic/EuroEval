@@ -11,8 +11,10 @@ import logging
 import re
 import shutil
 import typing as t
+import urllib.parse
 import warnings
 from copy import deepcopy
+from datetime import date
 
 import httpx
 from huggingface_hub import HfApi
@@ -24,6 +26,8 @@ from huggingface_hub.errors import (
 from huggingface_hub.hf_api import RepositoryNotFoundError
 from requests.exceptions import RequestException
 
+from euroeval.benchmark_modules.hf import get_model_release_date
+from euroeval.benchmark_modules.litellm import get_api_model_release_date
 from euroeval.string_utils import split_model_id
 
 from .cache import Cache
@@ -89,6 +93,7 @@ def add_missing_entries(
         model_additional["model_url"] = _generate_model_url_with_cache(
             model_id=plain_model_id(get_model_name(record=record)), cache=cache
         )
+    model_additional["release_date"] = _get_release_date(record=record, cache=cache)
 
     return record
 
@@ -248,6 +253,53 @@ def _parse_generative_type_input(
     if input_lower in {"3", "reasoning"}:
         return "reasoning"
     return None
+
+
+def _get_release_date(record: dict, cache: Cache) -> str | None:
+    """Get a model release date, using cached metadata when available.
+
+    Args:
+        record:
+            An EEE result record.
+        cache:
+            The model metadata cache.
+
+    Returns:
+        The ISO-formatted release date, or None if no date can be determined.
+    """
+    additional = record["model_info"]["additional_details"]
+    existing = additional.get("release_date")
+    if isinstance(existing, str):
+        try:
+            return date.fromisoformat(existing).isoformat()
+        except ValueError:
+            pass
+
+    model_id = split_model_id(
+        model_id=plain_model_id(get_model_name(record=record))
+    ).model_id
+    if model_id in cache.release_date:
+        cached = cache.release_date[model_id]
+        if cached is None:
+            return None
+        try:
+            return date.fromisoformat(cached).isoformat()
+        except ValueError:
+            del cache.release_date[model_id]
+
+    model_url = additional.get("model_url") or cache.model_url.get(model_id)
+    hf_hosts = {"hf.co", "huggingface.co", "www.hf.co", "www.huggingface.co"}
+    if (
+        isinstance(model_url, str)
+        and urllib.parse.urlparse(model_url).netloc in hf_hosts
+    ):
+        release_date = get_model_release_date(
+            hf_api=HfApi(), model_id=model_id, revision="main", token=None
+        )
+    else:
+        release_date = get_api_model_release_date(model_id)
+    cache.release_date[model_id] = release_date
+    return release_date
 
 
 def is_commercially_licensed(record: dict, cache: Cache) -> bool:

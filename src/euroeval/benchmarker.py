@@ -754,6 +754,7 @@ class Benchmarker:
                         else not benchmark_config.evaluate_test_split
                     ),
                     use_bits_per_character=benchmark_config.use_bits_per_character,
+                    release_date=model_config.release_date,
                     vllm_version=(
                         get_package_version("vllm")
                         if model_config.inference_backend == InferenceBackend.VLLM
