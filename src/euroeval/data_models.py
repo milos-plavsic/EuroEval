@@ -275,19 +275,9 @@ class BenchmarkResult(pydantic.BaseModel):
         """
         return benchmark_result_from_eee_dict(config=config)
 
-    @pydantic.field_validator("release_date", mode="before")
-    @classmethod
-    def normalise_release_date(cls, value: object) -> str | None:
-        """Normalise release dates and discard malformed historical metadata.
-
-        Args:
-            value:
-                The release date value being validated.
-
-        Returns:
-            An ISO-formatted date, or None when the value is absent or malformed.
-        """
-        return normalise_release_date(value)
+    _normalise_release_date = pydantic.field_validator("release_date", mode="before")(
+        normalise_release_date
+    )
 
 
 class HashableDict(dict[t.Any, t.Any]):
