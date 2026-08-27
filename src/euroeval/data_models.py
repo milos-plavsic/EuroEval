@@ -1,6 +1,7 @@
 """Data models used in EuroEval."""
 
 import collections.abc as c
+import datetime
 import importlib.metadata
 import json
 import logging
@@ -125,6 +126,7 @@ class BenchmarkResult(pydantic.BaseModel):
     commercially_licensed: bool | None = None
     open: bool | None = None
     trained_from_scratch: bool | None = None
+    release_date: str | None = None
 
     def append_to_results(self, results_path: Path) -> None:
         """Append the benchmark result to the results file.
@@ -273,6 +275,29 @@ class BenchmarkResult(pydantic.BaseModel):
         """
         return benchmark_result_from_eee_dict(config=config)
 
+    @pydantic.field_validator("release_date", mode="before")
+    @classmethod
+    def normalise_release_date(cls, value: object) -> str | None:
+        """Normalise release dates and discard malformed historical metadata.
+
+        Args:
+            value:
+                The release date value being validated.
+
+        Returns:
+            An ISO-formatted date, or None when the value is absent or malformed.
+        """
+        if isinstance(value, datetime.datetime):
+            return value.date().isoformat()
+        if isinstance(value, datetime.date):
+            return value.isoformat()
+        if not isinstance(value, str):
+            return None
+        try:
+            return datetime.date.fromisoformat(value).isoformat()
+        except ValueError:
+            return None
+
 
 class HashableDict(dict[t.Any, t.Any]):
     """A hashable dictionary."""
@@ -335,11 +360,15 @@ class HFModelInfo:
         adapter_base_model_id:
             The model ID of the base model if the model is an adapter model. Can be None
             if the model is not an adapter model.
+        release_date (optional):
+            The date when model weights were first publicly available, formatted as
+            ISO 8601. Defaults to None when it cannot be determined.
     """
 
     pipeline_tag: str
     tags: c.Sequence[str]
     adapter_base_model_id: str | None
+    release_date: str | None = None
 
 
 @dataclass
@@ -370,6 +399,8 @@ class ModelConfig:
         adapter_base_model_id:
             The model ID of the base model if the model is an adapter model. Can be None
             if the model is not an adapter model.
+        release_date (optional):
+            The model's public release date, formatted as ISO 8601. Defaults to None.
         generation_config (optional):
             The generation configuration for generative models, if specified in the
             model repository. Defaults to no generation configuration.
@@ -386,6 +417,7 @@ class ModelConfig:
     fresh: bool
     model_cache_dir: str
     adapter_base_model_id: str | None
+    release_date: str | None = None
     generation_config: GenerationConfig | None = None
 
     def __hash__(self) -> int:

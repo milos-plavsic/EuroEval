@@ -131,6 +131,20 @@ def test_deduplicate_keeps_newest_version() -> None:
     assert deduped[0]["eval_library"]["version"] == "17.6.0"
 
 
+def test_deduplicate_prefers_record_with_release_date() -> None:
+    """Release metadata survives deduplication against an otherwise equal record."""
+    without_date = _record(version="18.0.0")
+    with_date = _record(version="18.0.0")
+    with_date["model_info"]["additional_details"]["release_date"] = "2024-02-03"
+
+    deduped = deduplicate_records(records=[without_date, with_date])
+
+    assert len(deduped) == 1
+    assert (
+        deduped[0]["model_info"]["additional_details"]["release_date"] == "2024-02-03"
+    )
+
+
 def test_deduplicate_prefers_richer_metadata_same_version() -> None:
     """Among same-version duplicates, the one with richer metadata wins.
 
@@ -198,6 +212,14 @@ def test_metadata_richness_score_commercial() -> None:
     record_false = _record()
     record_false["model_info"]["additional_details"]["commercially_licensed"] = False
     assert _metadata_richness_score(record=record_false) == 1
+
+
+def test_metadata_richness_score_counts_release_date() -> None:
+    """A known release date contributes to metadata richness."""
+    record = _record()
+    initial_score = _metadata_richness_score(record)
+    record["model_info"]["additional_details"]["release_date"] = "2024-02-03"
+    assert _metadata_richness_score(record) == initial_score + 1
 
 
 def test_metadata_richness_score_empty() -> None:
