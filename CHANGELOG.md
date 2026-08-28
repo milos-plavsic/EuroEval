@@ -15,6 +15,8 @@ project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
   dataset from BelarusianGLUE.
 - Added the unofficial Belarusian linguistic acceptability dataset `belacola`, based on
   the BelaCoLA dataset from BelarusianGLUE.
+- Added five unofficial Slovak datasets derived from SKLEP: SKLEP NLI, SKLEP RTE,
+  SK-QuAD, WikiGoldSK and Reviews3.
 - Added the unofficial Belarusian BeRTE-WD binary natural language inference dataset.
 
 ### Changed
@@ -27,6 +29,8 @@ project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 - Fixed leaderboard deduplication treating malformed model release dates as valid
   metadata.
+- Fixed Hugging Face Router model IDs being rewritten with an unwanted `openai/` prefix
+  when using a custom API base.
 - Fixed an infinite loop in token-classification few-shot example selection when the
   training split runs out of entity-bearing examples before `num_few_shots` is reached,
   including when the labels contain case variants of the same entity (e.g. `b-per` and
